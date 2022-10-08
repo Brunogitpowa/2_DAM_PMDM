@@ -1,0 +1,44 @@
+  ## CODIGO DE LA ACTIVIDAD
+
+Para acceder a los elementos necesitaremos dos cosas.
+1.  Dentro de la carpeta LAYOUT el archivo llamado "Activity_Main.xml" para
+    conseguir la informacion necesaria para crear el vinculo.
+
+2.  Y el MainActivity que es donde crearemos las variables haciendo referencia 
+    a los diferentes elementos que tenemos en la pantalla principal de nuestro programa.
+
+Para realizar la navegacion de una a otra actividad lo primero sera crear la nueva
+actividad en mi caso llamada "welcome" y la unica forma de viajar de una a otra
+es haciendo un click sobre el Boton LOGIN.
+Con esta linea "startActivity(Intent(this,welcome::class.java))"
+-startActivity- para empezar nueva actividad -Intent() es un objeto que nos proporciona
+esa vinculacion hacia -welcome-.
+
+  ## MANIFEST
+
+En el archivo "AndroidManifest.xml" lo que tenemos es la raiz de la fuente del proyecto.
+Describe toda la informacion esencial de la aplicacion.
+
+- Los componentes de la aplicacion las Actividades y sus configuraciones.
+  En este caso la primera actividad:
+            <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="keyboardHidden|orientation|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+
+    Como vemos acontinuacion tenemos el nombre y el exported lo tenemos en true porque       
+    a continuacion tenemos otra Actividad compliendose la accion del MAIN.
+    Y el launcher se podria definir como el entorno de escritorio de Android.
+
+- La segunda actividad solo nos encontraremos con el nombre de dicha actividad y false ya
+  que no podremos exportar nada porque la aplicacion acaba ahi.
+             <activity
+            android:name=".welcome"
+            android:exported="false" />
+
+  ##  TRADUCCION
+
+Se crea un fichero nuevo con cada idioma que quieras instroducir ademas del String.xml que ya estaba con el nombre de la aplicacion.     
