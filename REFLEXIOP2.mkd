@@ -1,0 +1,186 @@
+ ### MEMORIA
+  ## CODIGO DE LA ACTIVIDAD 
+
+La actividad se va a componer de 3 Activitys
+
+#####  1 MAIN ACTIVITY
+1.  Hemos utilizado tal cual el login del primer trabajo, la unica diferencia ha sido el cambio de imagen inicial.
+    El funcionamiento sera el siguiente un nombre de usuario y una contraseña si fallas 3 veces se bloqueara y no podras acceder
+    cuando te logueas con el nombre de usuario ADMIN password 1234 avanzas a la segunda actividad llamada ListaIncidencias
+
+    Si nos fijamos dentro de activity_main.xml tuve que utilizar la imagen incidencia que era el que estaba preparado para
+    la lista de incidencias y el editor de incidencias y no el que teniamos para la potada que era ligeramente difernete porque 
+    desconociendo el motivo no me lo cogia me lo señalaba como error y desaparecian los diseños señal de que algo no estaba bien
+    y no descubri lo que ocurria.
+
+#####  2 LISTAINCIDENCIAS
+2.  Esta segunda actividad esta compuesta por una lista de incidencias como el diseño realizado en "res/layout/incidencia_layout.xml"
+    donde solo apareceria la imagen adjudicada que seria la utilizada anteriormente el titulo de la incidencia y la descripcion.
+    Y un Menu en la parte superior derecha donde tendriamos la opcion de ingresar una incidencia o salir de la Actividad.
+    Al hacer clik en nueva incidencia pasara al editor de incidencias que veremos despues.
+    
+    
+    
+    
+    Este menu lo hemos creado en un XML aparte /res/menu/menu.xml con el siguiente contenido
+
+          <?xml version="1.0" encoding="utf-8"?>
+          <menu xmlns:tools="http://schemas.android.com/tools"
+              xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto">
+
+              <item
+                  android:id="@+id/accion1"
+                  android:title="@string/accion1" />
+              <item
+                  android:id="@+id/accion2"
+                  android:title="@string/accion2" />
+          </menu>
+
+
+
+    Ademas creo una clase Menu donde vinculamos las opcion y le indicamos el funcionamiento de las opciones
+
+
+          override fun onOptionsItemSelected(item: MenuItem): Boolean {
+            return when (item.itemId) {
+
+              R.id.accion1 -> { //startActivity(Intent(this,EditorIncidencia::class.java))
+                  val intent = Intent(this, EditorIncidencia::class.java)
+                  intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                  ActivitatActual = 0
+                  startActivity(intent)
+                  true
+              }
+              R.id.accion2 -> {
+                  val intent = Intent(this, ListaIncidencias::class.java)
+                  intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                  ActivitatActual = 1
+                  startActivity(intent)
+                  true
+              }
+
+              else -> super.onOptionsItemSelected(item)
+          }
+
+          
+
+
+    El funcionamiento devia de ser que al realizar un click , mostraria la informacion de dicha incidencia de manera completa.
+    Para eso creo:
+
+          private fun itemClicked(incidencia: Incidencia, v:View){
+            val intent = Intent(this,EditorIncidencia::class.java).apply {
+                putExtra("com.example.incidenciasp2.Incidencias", incidencia)
+            }
+            startActivity(intent)
+          } 
+
+    
+    
+    
+    Creada la clase Incidencia con los atrbutos que lleva y la creamos serializable no llevara metodos y la podremos usar cuando queramos.
+    una vez creada la podremos recuperar para modificarla y demas.
+          
+        
+        data class Incidencia(
+        var imagen: Int,
+        var titulo: String,
+        var calle: String,
+        val explicacion: String,
+        val spinner: String,
+        val switch: String
+
+        ): Serializable {
+
+
+
+    
+    Creamos un Objeto Incidencias donde implementamos las funciones add, replace, remove.
+
+
+
+            fun add(incidencia: Incidencia){
+              incidencias.add(incidencia);
+            }
+
+
+            fun replace(original:Incidencia, newIncidencia: Incidencia){
+              val index = incidencias.indexOf(original)
+              incidencias[index]=newIncidencia
+            }
+
+
+            fun remove(incidenciaAEliminar: Incidencia):Int{
+              val index = incidencias.indexOf(incidenciaAEliminar)
+              incidencias.remove(incidenciaAEliminar)
+              return index
+            }
+
+
+
+
+
+
+    Y en el caso de que quisieramos borrar una incidencia hariamos un click largo sobre la incidencia en cuestion.
+
+      
+          private fun itemLongClicked(incidencia: Incidencia, v: View) {
+            incidenciaToRemove=incidencia
+
+            val myDialog = MyDialogFragment(getString(R.string.askRemoveTitle), getString(R.string.askRemove))
+            myDialog.show(supportFragmentManager, "removeDialog")
+          } 
+
+
+    1- Para el correcto funcionamiento necesitabamos una Clase Adaptador que recoge un objecto viewHolder y lo arreglaba para mostrarlo en
+       la actividad ListaIncidencias.
+    
+
+
+          class AdaptadorIncidencias(
+              val eventListenerClick:(Incidencia, View) -> Unit,
+              val eventListenerLongClick: (Incidencia, View) -> Boolean
+          ): RecyclerView.Adapter<RecyclerView.ViewHolder>()
+
+       
+       Contiene dos funciones onCreateViewHolder y onBindViewHolder  
+       Una es para crear el view holder y nos devolvera la vista que tendremos de ese objeto en la actividad, y el otro para enlazarlo en x posicion.
+
+    2- La clase viewholder es el diseño o el objeto que el adaptador ha de coger para trabajar con el  y mostrarlo en la lista. 
+
+            class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
+                  val img = itemView.findViewById(R.id.imageView2) as ImageView
+                  val titulo = itemView.findViewById(R.id.textView) as TextView
+                  val descripcion = itemView.findViewById(R.id.textView2) as TextView
+
+              fun bind(
+                  incidencia: Incidencia,
+                  eventListenerClick: (Incidencia, View) -> Unit,
+                  eventListenerLongClick: (Incidencia, View) -> Boolean
+              ){
+                  itemView.setOnClickListener {
+                      eventListenerClick(incidencia, itemView)
+                  }
+                  itemView.setOnLongClickListener{
+                     eventListenerLongClick(incidencia,itemView)
+              }
+
+
+
+
+El problema que he tenido en esta parte ha sido que no he sabido adaptar las piezas para que me mostrara las incidencias el Viewholder creo que estaba bien hecho plantilla y todo.
+El adaptador despues de consultar apuntes tus videos y mas webs pues al no verse en la 2Actividad pues deduzco que no estaba bien realizado ya que la parte de añadir un ReciclerView
+no traia mas misterio que añadirlo al diseñoy esperar a que el adaptador le pasara los objetos trabajados que le pasaba el ViewHolder.             
+
+##### EDITORINCIDENCIAS
+3.  A esta tercera actividad contiene un spinner con tipos de incidencia un switch  un boton para guardar dicha incidencia y ningun campo 
+    de texto podia estar vacio ya que no te permitia guardar la incidencia avisandote con un mensaje con el campo que estaba vacio avisandote de que no podia estarlo.
+    El spinner utilice el archivo de String dentro de la carpeta "values" para darle los items.
+              
+
+
+
+Resumiendo a mi personalmente no me parece complicado solo que hay momentos en los que no das con la tecla o puedes estar estancado quiza por de querer hacerlo sin ayuda y no preguntar
+para aprender a ser mas resolutivo.
+Seguire intentandolo :D 
